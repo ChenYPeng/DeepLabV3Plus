@@ -1,0 +1,19 @@
+{
+  "model_name": "DeepLabV3Plus",
+  "backbone": "resnet",
+  "dataset": "pascalvoc",
+  "num_class": 21,
+  "epochs": 300,
+  "batch_size": 2,
+  "num_workers": 2,
+  "base_size": 640,
+  "crop_size": 513,
+  "optimizer": "Ranger",
+  "scheduler": "poly",
+  "criterion": "Cross",
+  "use_balanced_weights": "True",
+  "base_lr": 0.00125,
+  "lr_step": 50,
+  "weight_decay": 1e-4,
+  "momentum": 0.9
+}
