@@ -31,7 +31,7 @@ def test(cfg, runid, use_pth='best_Eval_MIoU.pth'):
     # 加载测试集
     image_files = []
     input_path = 'samples/src'
-    output_path = 'samples/'
+    output_path = 'samples/res'
     if os.path.isdir(input_path):
         for ext in ['png', 'jpeg', 'jpg', 'JPEG', 'bmp']:
             files = glob.glob(os.path.join(input_path, '**/*.%s' % ext), recursive=True)
@@ -39,6 +39,9 @@ def test(cfg, runid, use_pth='best_Eval_MIoU.pth'):
                 image_files.extend(files)
     elif os.path.isfile(input_path):
         image_files.append(input_path)
+    
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
 
     transform = T.Compose([
         T.ToTensor(),
