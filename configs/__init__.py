@@ -1,7 +1,4 @@
 import json
-import os
-
-print(os.getcwd())
 
 
 def get_config(cfg_name):
