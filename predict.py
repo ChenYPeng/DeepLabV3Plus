@@ -10,22 +10,16 @@ import torchvision.transforms as T
 from PIL import Image
 from gpuinfo import GPUInfo
 
-from core.log import get_logger
 from dataloaders.utils import decode_segmap
 from models import build_model, modified_mode_dict
 
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def test(cfg, runid, use_pth='best_Eval_MIoU.pth'):
+def predict(cfg, runid, use_pth='best_Eval_MIoU.pth'):
     dataset = cfg["dataset"]
     model_name = cfg["model_name"]
-    class_num = cfg['num_class']
     train_logdir = os.path.join('run', dataset, model_name, runid)
-    test_logdir = os.path.join('res', dataset, model_name, runid)
-    logger = get_logger(test_logdir, 'test')
-    logger.info(f'Conf | use logdir {train_logdir}')
-    logger.info(f'Conf | use dataset {dataset}')
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # 加载测试集
@@ -39,7 +33,7 @@ def test(cfg, runid, use_pth='best_Eval_MIoU.pth'):
                 image_files.extend(files)
     elif os.path.isfile(input_path):
         image_files.append(input_path)
-    
+
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
@@ -66,21 +60,22 @@ def test(cfg, runid, use_pth='best_Eval_MIoU.pth'):
         img_name = os.path.basename(img_path)[:-len(ext) - 1]
         img = Image.open(img_path).convert('RGB')
 
-        img = transform(img).unsqueeze(0)  # To tensor of NCHW
+        img = transform(img).unsqueeze(0)  # To tensor of N C H W
         img = img.to(device)
+
         with torch.no_grad():
             outputs = model(img)
         pred = outputs.max(1)[1].squeeze().cpu().data.numpy()  # (1024, 1280)
-        pred = decode_segmap(pred, dataset, plot=False)
-        pred = Image.fromarray(np.unit8(pred * 255))
+        pred = decode_segmap(pred, dataset, plot=False)  # 保存预测标签图需注释此行
+        pred = Image.fromarray(np.uint8(pred))
         pred.save(os.path.join(output_path, img_name + '.png'))
 
 
 if __name__ == '__main__':
     config = 'hanfeng/deeplab-resnet-hanfeng.json'
-    run_id = '2022-07-25-16-59-9929'
+    run_id = '2022-07-26-08-29-2265'
     config_dir = os.path.join('configs', config)
     with open(config_dir, 'r') as fp:
         cfg = json.load(fp)
 
-    test(cfg, run_id)
+    predict(cfg, run_id)
